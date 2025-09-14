@@ -1,0 +1,61 @@
+# Dependencies
+node_modules/
+client/node_modules/
+
+# Production build
+client/build/
+dist/
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Output files
+knowledge_base_*.json
+example_output.json
+test_result_*.json
+*.json
+!package.json
+!package-lock.json
+!client/package.json
+!client/package-lock.json
+!manifest.json
+!asset-manifest.json
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Puppeteer
+.puppeteer_cache/

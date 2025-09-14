@@ -1,0 +1,47 @@
+{
+  "name": "knowledge-base-scraper",
+  "version": "1.0.0",
+  "description": "Universal web scraper for technical knowledge bases",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "scrape": "node src/cli.js",
+    "test": "node src/test.js",
+    "showcase": "node src/showcase.js",
+    "quickstart": "node quickstart.js",
+    "build-ui": "cd client && npm run build",
+    "dev-ui": "cd client && npm start",
+    "setup": "npm install && cd client && npm install"
+  },
+  "keywords": [
+    "scraper",
+    "web-scraper",
+    "knowledge-base",
+    "content-extraction"
+  ],
+  "author": "Maddie's Assignment Solution",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.7",
+    "cheerio": "^1.0.0-rc.12",
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "puppeteer": "^21.0.0",
+    "turndown": "^7.1.2",
+    "xml2js": "^0.6.2",
+    "commander": "^12.0.0",
+    "chalk": "^5.3.0",
+    "ora": "^8.0.1",
+    "valid-url": "^1.0.9",
+    "url-parse": "^1.5.10",
+    "@mozilla/readability": "^0.5.0",
+    "jsdom": "^24.0.0",
+    "p-limit": "^5.0.0",
+    "robots-parser": "^3.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.3"
+  }
+}
