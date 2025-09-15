@@ -25,10 +25,85 @@ class UniversalScraper {
             replacement: (content) => `~~${content}~~`
         });
 
+        // Comprehensive content patterns covering all common URL structures
         this.contentPatterns = [
-            '/blog', '/posts', '/articles', '/news', '/insights',
-            '/resources', '/learn', '/guides', '/topics', '/tutorials',
-            '/docs', '/documentation', '/knowledge', '/stories', '/writings'
+            // Content types
+            '/blog', '/posts', '/post', '/articles', '/article', '/news', '/insights', '/stories',
+            '/writings', '/write', '/read', '/content', '/publications', '/publish',
+
+            // Learning resources
+            '/learn', '/learning', '/guides', '/guide', '/tutorials', '/tutorial',
+            '/how-to', '/howto', '/how_to', '/lessons', '/courses', '/course',
+            '/education', '/training', '/workshop', '/webinar',
+
+            // Documentation & Help
+            '/docs', '/documentation', '/doc', '/api', '/reference', '/manual',
+            '/help', '/support', '/faq', '/faqs', '/kb', '/knowledge-base',
+            '/knowledge', '/wiki', '/resources', '/resource',
+
+            // Technical content
+            '/tech', '/technical', '/engineering', '/development', '/programming',
+            '/coding', '/code', '/developers', '/dev', '/labs', '/research',
+
+            // Media & Updates
+            '/podcast', '/podcasts', '/video', '/videos', '/media', '/press',
+            '/updates', '/changelog', '/releases', '/announcements',
+
+            // Community & Insights
+            '/community', '/forum', '/forums', '/discussion', '/insights',
+            '/thoughts', '/opinions', '/perspectives', '/ideas', '/tips',
+
+            // Categories & Topics
+            '/topics', '/topic', '/categories', '/category', '/cat', '/tag',
+            '/subject', '/subjects', '/area', '/areas', '/section',
+
+            // Case studies & Examples
+            '/case-study', '/case-studies', '/cases', '/examples', '/example',
+            '/showcase', '/portfolio', '/work', '/projects', '/stories',
+
+            // Company content
+            '/about', '/team', '/careers', '/culture', '/values', '/mission',
+            '/events', '/event', '/conference', '/meetup', '/talks',
+
+            // Time-based
+            '/archive', '/archives', '/history', '/timeline', '/recent',
+            '/latest', '/new', '/trending', '/popular', '/featured'
+        ];
+
+        // Keywords that indicate content anywhere in URL
+        this.contentKeywords = new RegExp(
+            'tutorial|guide|article|blog|post|story|lesson|course|' +
+            'how-to|howto|how_to|tip|trick|example|study|case|' +
+            'learn|teach|explain|understand|master|practice|' +
+            'introduction|intro|basic|advanced|beginner|intermediate|' +
+            'documentation|docs|reference|manual|handbook|' +
+            'resource|material|content|information|knowledge|' +
+            'update|announcement|release|changelog|news|' +
+            'insight|thought|opinion|perspective|analysis|' +
+            'technical|tech|engineering|development|programming|' +
+            'podcast|video|webinar|presentation|talk|' +
+            'faq|help|support|troubleshoot|solve|fix|' +
+            'best-practice|pattern|approach|method|technique|' +
+            'framework|library|tool|platform|service|' +
+            'review|comparison|versus|alternative|option',
+            'i'
+        );
+
+        // URL patterns that indicate content structure
+        this.datePatterns = [
+            /\/\d{4}\/\d{2}\//, // /2024/03/
+            /\/\d{4}\/\d{1,2}\//, // /2024/3/
+            /\/\d{4}-\d{2}-\d{2}/, // /2024-03-15
+            /\/\d{8}\//, // /20240315/
+        ];
+
+        // Patterns to identify content by URL structure
+        this.structurePatterns = [
+            /\/[a-z-]+\/[a-z0-9-]+\/?$/i, // /category/article-name
+            /\/\d+\/[a-z0-9-]+\/?$/i, // /123/article-name (ID based)
+            /\/[a-z]{2}\/[a-z-]+\/?$/i, // /en/article-name (language based)
+            /\/[a-z-]+\/\d{4}\//, // /blog/2024/
+            /\/(p|page|post|article)\/\d+/i, // /p/123 (common in CMSs)
         ];
 
         this.fileExtensionsToSkip = new Set([
@@ -260,9 +335,18 @@ class UniversalScraper {
                             urls.add(cleanUrl);
 
                             // Recursively crawl content pages
-                            const isContentPage = this.contentPatterns.some(pattern =>
-                                parsed.pathname.toLowerCase().includes(pattern)
-                            );
+                            const pathLower = parsed.pathname.toLowerCase();
+
+                            // Check multiple indicators for content
+                            const isContentPage =
+                                // 1. Matches our content patterns
+                                this.contentPatterns.some(pattern => pathLower.includes(pattern)) ||
+                                // 2. Contains content keywords
+                                this.contentKeywords.test(pathLower) ||
+                                // 3. Matches date-based patterns (blog posts often use dates)
+                                this.datePatterns.some(pattern => pattern.test(parsed.pathname)) ||
+                                // 4. Matches common content URL structures
+                                this.structurePatterns.some(pattern => pattern.test(parsed.pathname));
 
                             if (isContentPage && currentDepth < maxDepth - 1) {
                                 this.crawlPageForUrls(cleanUrl, baseUrl, maxDepth, currentDepth + 1)
@@ -283,21 +367,63 @@ class UniversalScraper {
     filterContentUrls(urls, baseUrl) {
         const filtered = new Set();
 
-        // Patterns to exclude
+        // Patterns to exclude - updated to be more precise
         const excludePatterns = [
-            /\/tag\//i, /\/category\//i, /\/author\//i, /\/page\/\d+/i,
-            /\/#/i, /\/login/i, /\/signup/i, /\/register/i, /\/contact/i,
-            /\/about/i, /\/privacy/i, /\/terms/i, /\/cart/i, /\/checkout/i,
-            /\/account/i, /\.xml$/i, /\.json$/i, /\/feed/i, /\/rss/i,
-            /\/search/i, /\/404/i, /\/wp-admin/i, /\/admin/i
+            // Navigation & pagination
+            /\/page\/\d+$/i, /\/p\/\d+$/i, /\?page=\d+/i, /\/tag\/?$/i, /\/tags\/?$/i,
+            /\/category\/?$/i, /\/categories\/?$/i, /\/author\/?$/i, /\/authors\/?$/i,
+
+            // User & account pages
+            /\/login\/?$/i, /\/signin\/?$/i, /\/signup\/?$/i, /\/register\/?$/i,
+            /\/logout\/?$/i, /\/account\/?$/i, /\/profile\/?$/i, /\/settings\/?$/i,
+            /\/dashboard\/?$/i, /\/admin/i, /\/wp-admin/i,
+
+            // Legal & policy pages  
+            /\/privacy\/?$/i, /\/terms\/?$/i, /\/tos\/?$/i, /\/disclaimer\/?$/i,
+            /\/cookie/i, /\/gdpr/i, /\/legal\/?$/i, /\/policy\/?$/i,
+
+            // Commerce
+            /\/cart\/?$/i, /\/checkout\/?$/i, /\/shop\/?$/i, /\/store\/?$/i,
+            /\/products?\/?$/i, /\/pricing\/?$/i, /\/plans\/?$/i, /\/subscribe\/?$/i,
+
+            // Technical/Feed URLs
+            /\.xml$/i, /\.json$/i, /\/feed\/?$/i, /\/rss\/?$/i, /\/atom\/?$/i,
+            /\/sitemap/i, /\/robots\.txt$/i, /\/#/i,
+
+            // Error pages
+            /\/404\/?$/i, /\/error\/?$/i, /\/500\/?$/i, /\/403\/?$/i,
+
+            // Search & filters
+            /\/search\/?$/i, /\?q=/i, /\?s=/i, /\/filter\/?$/i,
+
+            // Contact pages (but keep specific contact articles)
+            /\/contact\/?$/i, /\/contact-us\/?$/i,
+
+            // Print/PDF versions
+            /\/print\/?$/i, /\.pdf$/i, /\/download\/?$/i
         ];
 
         for (const url of urls) {
+            const parsed = new URL(url);
+            const pathname = parsed.pathname;
+            const pathLower = pathname.toLowerCase();
+
             // Skip if matches exclude pattern
             const shouldExclude = excludePatterns.some(pattern => pattern.test(url));
 
             // Skip if it's just the base URL
-            if (!shouldExclude && url.replace(/\/$/, '') !== baseUrl.replace(/\/$/, '')) {
+            const isBaseUrl = url.replace(/\/$/, '') === baseUrl.replace(/\/$/, '');
+
+            // Include if it looks like content (even if it matches some exclude patterns)
+            const looksLikeContent =
+                this.contentKeywords.test(pathLower) ||
+                this.datePatterns.some(pattern => pattern.test(pathname)) ||
+                this.structurePatterns.some(pattern => pattern.test(pathname)) ||
+                // Has substantial path depth (likely an article)
+                (pathname.split('/').filter(p => p.length > 0).length >= 2 &&
+                    /[a-z0-9-]{10,}/i.test(pathname)); // Long slug usually means article
+
+            if (!isBaseUrl && (!shouldExclude || looksLikeContent)) {
                 filtered.add(url);
             }
         }

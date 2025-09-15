@@ -86,6 +86,6 @@ app.listen(PORT, () => {
 ║                                                               ║
 ║  Server is running on http://localhost:${PORT}                   ║
 ║  API endpoint: POST http://localhost:${PORT}/api/scrape          ║
-╚═══════════════════════════════════════════════════════════════d 
+╚═══════════════════════════════════════════════════════════════╝
   `);
 });
